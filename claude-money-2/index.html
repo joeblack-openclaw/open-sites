@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10 шагов до богатства, славы и цифрового психоза</title>
+  <meta name="description" content="Черно-зеленый манифест о том, как стать богатым и успешным с помощью Claude Code и OpenClaw за 10 шагов." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Unbounded:wght@400;700;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    :root {
+      --bg: #020402;
+      --bg-2: #071107;
+      --panel: rgba(4, 20, 6, 0.75);
+      --line: rgba(0, 255, 102, 0.18);
+      --green: #00ff66;
+      --green-2: #7dff3b;
+      --green-3: #00d95c;
+      --acid: #d4ff00;
+      --danger: #ff325c;
+      --text: #d9ffe7;
+      --muted: #76b88b;
+      --shadow: 0 0 30px rgba(0,255,102,0.22);
+      --mono: 'JetBrains Mono', monospace;
+      --display: 'Unbounded', sans-serif;
+      --glitch: 'Rubik Glitch', system-ui;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background:
+        radial-gradient(circle at 20% 20%, rgba(0,255,102,0.12), transparent 30%),
+        radial-gradient(circle at 80% 0%, rgba(125,255,59,0.08), transparent 30%),
+        linear-gradient(180deg, #010201 0%, #031106 45%, #010201 100%);
+      color: var(--text);
+      font-family: var(--mono);
+      overflow-x: hidden;
+      cursor: crosshair;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(0,255,102,0.04) 0,
+          rgba(0,255,102,0.04) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+      pointer-events: none;
+      mix-blend-mode: overlay;
+      z-index: 100;
+    }
+
+    .noise, .grid, #matrix {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .grid {
+      background-image:
+        linear-gradient(rgba(0,255,102,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,102,0.06) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(circle at center, black 45%, transparent 100%);
+      z-index: 0;
+    }
+
+    .noise {
+      opacity: 0.08;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3) 0 1px, transparent 1px),
+        radial-gradient(circle at 80% 40%, rgba(255,255,255,0.2) 0 1px, transparent 1px),
+        radial-gradient(circle at 30% 70%, rgba(255,255,255,0.25) 0 1px, transparent 1px);
+      background-size: 120px 120px;
+      animation: noiseShift 0.25s infinite steps(2);
+      z-index: 1;
+    }
+
+    @keyframes noiseShift {
+      50% { transform: translate(1px, -1px); }
+    }
+
+    #matrix {
+      z-index: 0;
+      opacity: 0.18;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 2;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(10px);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .topbar .brand {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 20px var(--green);
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      50% { opacity: 0.35; transform: scale(0.8); }
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 80px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-inner {
+      max-width: 1180px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 18px;
+      color: var(--green-2);
+      border: 1px solid var(--line);
+      padding: 7px 12px;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      background: rgba(0,255,102,0.06);
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      font-family: var(--display);
+      font-weight: 900;
+      font-size: clamp(48px, 8vw, 132px);
+      line-height: 0.9;
+      text-transform: uppercase;
+      letter-spacing: -0.04em;
+      color: var(--green);
+      text-shadow: 0 0 26px rgba(0,255,102,0.34);
+    }
+
+    h1 .glitch {
+      display: block;
+      color: var(--acid);
+      font-family: var(--glitch);
+      font-weight: 400;
+      margin-top: 10px;
+      filter: drop-shadow(0 0 18px rgba(212,255,0,0.35));
+    }
+
+    .hero p {
+      max-width: 720px;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: clamp(15px, 1.8vw, 20px);
+      line-height: 1.7;
+    }
+
+    .hero p strong { color: var(--green-2); }
+    .hero p em { color: var(--danger); font-style: normal; }
+
+    .actions {
+      margin-top: 28px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 24px;
+      border: 1px solid var(--green);
+      color: var(--green);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 800;
+      background: rgba(0,255,102,0.06);
+      transition: 0.2s ease;
+      box-shadow: 6px 6px 0 rgba(125,255,59,0.16);
+    }
+
+    .btn:hover {
+      transform: translate(-2px, -2px);
+      background: var(--green);
+      color: #031106;
+      box-shadow: 12px 12px 0 rgba(212,255,0,0.18), 0 0 24px rgba(0,255,102,0.3);
+    }
+
+    .hero-card {
+      position: relative;
+      background: linear-gradient(180deg, rgba(0,255,102,0.08), rgba(0,0,0,0.72));
+      border: 1px solid var(--line);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "CLAUDE x OPENCLAW";
+      position: absolute;
+      right: -40px;
+      top: 18px;
+      transform: rotate(18deg);
+      font-size: 13px;
+      color: rgba(212,255,0,0.18);
+      letter-spacing: 0.4em;
+    }
+
+    .terminal {
+      background: #010301;
+      border: 1px solid rgba(0,255,102,0.14);
+      padding: 18px;
+      min-height: 430px;
+      font-size: 13px;
+      line-height: 1.75;
+      color: var(--green);
+      box-shadow: inset 0 0 24px rgba(0,255,102,0.08);
+    }
+
+    .terminal .muted { color: #4ca06e; }
+    .terminal .accent { color: var(--acid); }
+    .terminal .danger { color: var(--danger); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--line);
+      margin: 0 24px;
+      border: 1px solid var(--line);
+    }
+
+    .stat {
+      background: rgba(0,0,0,0.68);
+      padding: 28px 20px;
+    }
+
+    .stat strong {
+      display: block;
+      font-family: var(--display);
+      font-size: clamp(28px, 4vw, 54px);
+      color: var(--green-2);
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .section {
+      padding: 90px 24px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .section-head {
+      margin-bottom: 34px;
+    }
+
+    .section-head small {
+      display: inline-block;
+      color: var(--acid);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      font-size: 11px;
+    }
+
+    .section-head h2 {
+      font-family: var(--display);
+      font-size: clamp(34px, 6vw, 84px);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      color: var(--green);
+    }
+
+    .section-head p {
+      margin-top: 14px;
+      max-width: 800px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .step {
+      position: relative;
+      background: linear-gradient(135deg, rgba(0,255,102,0.07), rgba(0,0,0,0.7));
+      border: 1px solid var(--line);
+      padding: 24px 24px 22px 96px;
+      min-height: 220px;
+      overflow: hidden;
+      transition: 0.25s ease;
+    }
+
+    .step:hover {
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(125,255,59,0.35);
+      box-shadow: 0 0 40px rgba(0,255,102,0.1);
+    }
+
+    .step-index {
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      background: var(--green);
+      color: #010301;
+      font-family: var(--display);
+      font-weight: 900;
+      font-size: 22px;
+      clip-path: polygon(50% 0%, 100% 30%, 100% 70%, 50% 100%, 0% 70%, 0% 30%);
+      box-shadow: 0 0 20px rgba(0,255,102,0.35);
+    }
+
+    .step h3 {
+      font-family: var(--display);
+      font-size: 23px;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: 12px;
+      color: var(--green-2);
+    }
+
+    .step p {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+    }
+
+    .cmd {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border: 1px dashed rgba(0,255,102,0.24);
+      color: var(--green);
+      background: rgba(0,255,102,0.05);
+      font-size: 12px;
+    }
+
+    .final {
+      margin-top: 32px;
+      padding: 28px;
+      border: 1px solid rgba(212,255,0,0.22);
+      background: linear-gradient(135deg, rgba(212,255,0,0.06), rgba(0,255,102,0.04), rgba(0,0,0,0.72));
+      box-shadow: 0 0 40px rgba(212,255,0,0.08);
+    }
+
+    .final h3 {
+      font-family: var(--glitch);
+      font-size: clamp(30px, 4vw, 60px);
+      color: var(--acid);
+      margin-bottom: 16px;
+      letter-spacing: 0.04em;
+    }
+
+    .final p {
+      max-width: 860px;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    footer {
+      padding: 28px 24px 44px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+      color: #59876a;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 980px) {
+      .hero-inner, .steps, .stats { grid-template-columns: 1fr; }
+      .hero { min-height: auto; }
+      .hero-card { order: -1; }
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 46px; }
+      .step { padding: 90px 18px 20px; }
+      .step-index { left: 18px; top: 16px; }
+      .topbar { font-size: 10px; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+  <div class="grid"></div>
+  <div class="noise"></div>
+
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span> protocol:// rich-success.exe</div>
+      <div>claude code + openclaw + тотальная дерзость</div>
+    </div>
+
+    <section class="hero">
+      <div class="hero-inner">
+        <div>
+          <div class="eyebrow">сумасшедший протокол восхождения</div>
+          <h1>
+            10 шагов<br>
+            к деньгам,<br>
+            влиянию и<br>
+            <span class="glitch">цифровому величию</span>
+          </h1>
+          <p>
+            Это <strong>упоротый черно-зеленый манифест</strong> о том, как с помощью <strong>Claude Code</strong> и <strong>OpenClaw</strong>
+            превратить хаос, идеи, бессонницу и амбиции в систему, которая выглядит как стартап-культ,
+            а работает как <em>машина по производству результата</em>.
+          </p>
+          <div class="actions">
+            <a class="btn" href="#steps">врубить 10 шагов</a>
+            <a class="btn" href="#final">стать легендой</a>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="terminal">
+            <div><span class="muted">[boot]</span> инициализация богатства... <span class="accent">OK</span></div>
+            <div><span class="muted">[scan]</span> найдены слабости: <span class="danger">прокрастинация, хаос, ручной труд</span></div>
+            <div><span class="muted">[inject]</span> Claude Code внедрён в мыслепоток</div>
+            <div><span class="muted">[spawn]</span> OpenClaw поднимает агентов: <span class="accent">frontend / backend / content / outreach</span></div>
+            <br>
+            <div>&gt; цель: <span class="accent">стать богатым и заметным</span></div>
+            <div>&gt; режим: <span class="accent">абсурдно эффективный</span></div>
+            <div>&gt; моральные издержки: <span class="danger">обсуждаются отдельно</span></div>
+            <br>
+            <div class="muted">$ forecast --future</div>
+            <div>через 30 дней: <span class="accent">лендинги, контент, автоматизация</span></div>
+            <div>через 90 дней: <span class="accent">воронки, деньги, репутация</span></div>
+            <div>через 180 дней: <span class="accent">ты уже сам продаёшь курс про это</span></div>
+            <br>
+            <div class="muted">$ warning</div>
+            <div>побочный эффект: внезапная уверенность, легкий мания-core и любовь к зелёным интерфейсам.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><strong>10</strong><span>шагов до психоза продуктивности</span></div>
+      <div class="stat"><strong>24/7</strong><span>агенты не спят, в отличие от тебя</span></div>
+      <div class="stat"><strong>∞</strong><span>уровень самоуверенности после деплоя</span></div>
+      <div class="stat"><strong>404%</strong><span>рост амбиций, метрики не найдены</span></div>
+    </section>
+
+    <section class="section" id="steps">
+      <div class="section-head">
+        <small>план захвата реальности</small>
+        <h2>десять шагов к богатству и успеху через claude code и openclaw</h2>
+        <p>
+          Эстетика тут намеренно едет кукухой, но логика железная: сначала находишь рыночную возможность,
+          потом строишь прототипы, дальше автоматизируешь, усиливаешь охват, масштабируешь систему и добиваешься того,
+          чтобы результат приезжал быстрее, чем успевает включиться внутренний саботажник.
+        </p>
+      </div>
+
+      <div class="steps">
+        <article class="step"><div class="step-index">01</div><h3>Выбери жирную нишу</h3><p>Пусть Claude Code разложит твои навыки, боли рынка и денежные сегменты. Не гадай, а быстро собери карту возможностей и выбери направление, где есть спрос, маржа и энергия делать это долго.</p><div class="cmd">claude: найди нишу, где я могу быстро стать опасно полезным</div></article>
+        <article class="step"><div class="step-index">02</div><h3>Собери MVP без страданий</h3><p>С OpenClaw ты не нянчишься с каждым файлом вручную. Запускаешь агентов, разбиваешь задачу на части, и за пару дней получаешь работающий прототип вместо бесконечного «я всё ещё планирую».</p><div class="cmd">openclaw spawn frontend + backend + copy</div></article>
+        <article class="step"><div class="step-index">03</div><h3>Упакуй оффер как культ</h3><p>Claude пишет тексты, офферы, хуки, FAQ, возражения и страницы продаж. Твоя задача, не мямлить. Обещание должно бить в лоб, а сайт, выглядеть как вещь, в которую страшно не зайти.</p><div class="cmd">claude: сделай оффер, от которого неловко отказаться</div></article>
+        <article class="step"><div class="step-index">04</div><h3>Запусти контент-машину</h3><p>Из одной идеи делай 20 единиц контента. Статья, тред, пост, сценарий, лендинг, шортс, письмо, лид-магнит. Claude генерит основу, OpenClaw раскладывает это по каналам и форматам.</p><div class="cmd">pipeline: idea → content swarm → omnichannel</div></article>
+        <article class="step"><div class="step-index">05</div><h3>Автоматизируй продажи</h3><p>Пока кто-то вручную отвечает на каждый лид, ты строишь систему: формы, боты, письма, сегменты, follow-up, CRM-ритуалы. Чем меньше ручного ада, тем быстрее приходят деньги.</p><div class="cmd">openclaw funnel --mode relentless</div></article>
+        <article class="step"><div class="step-index">06</div><h3>Подними армию агентов</h3><p>Один агент анализирует рынок, другой пилит лендинг, третий штурмует outreach, четвёртый чистит хвосты. OpenClaw нужен именно для этого, чтобы ты управлял системой, а не жил в таск-менеджере.</p><div class="cmd">openclaw scale agents=insane-but-beautiful</div></article>
+        <article class="step"><div class="step-index">07</div><h3>Считай деньги, а не лайки</h3><p>Claude помогает выстроить модель: CAC, LTV, маржа, ROMI, точки роста. Если метрика не влияет на выручку, она идёт в музей тщеславия. Здесь считается только то, что приближает к кэшу.</p><div class="cmd">claude: собери финансовую модель без иллюзий</div></article>
+        <article class="step"><div class="step-index">08</div><h3>Сделай бренд, который кусается</h3><p>Успех любит не только качество, но и образ. Придумай голос, визуал, тон, легенду. Пусть люди узнают тебя по стилю быстрее, чем успеют дочитать до конца первый абзац.</p><div class="cmd">brand.exe --voice dominant --style neon-chaos</div></article>
+        <article class="step"><div class="step-index">09</div><h3>Масштабируй через систему</h3><p>Как только нашёл работающую воронку, не начинай геройствовать. Дублируй процессы, шаблоны, агентов, страницы, гипотезы. Богатство любит повторяемость больше, чем вдохновение.</p><div class="cmd">replicate success, not suffering</div></article>
+        <article class="step"><div class="step-index">10</div><h3>Продай путь назад в мир</h3><p>Финальный мув: ты не просто зарабатываешь, ты превращаешь опыт в продукт. Курс, консалтинг, комьюнити, подписка, студия. То есть теперь система кормит сама себя, а ты уже миф.</p><div class="cmd">legend-mode --monetize everything tasteful</div></article>
+      </div>
+
+      <div class="final" id="final">
+        <h3>богатство, успех и зелёный экран</h3>
+        <p>
+          Секрет не в магии. Секрет в том, что <strong>Claude Code</strong> снимает когнитивный перегруз, <strong>OpenClaw</strong> забирает рутину,
+          а ты наконец перестаёшь быть оператором собственной усталости. Этот сайт сатирически орёт, но суть честная: если собрать
+          систему, автоматизацию, ясное позиционирование и скорость исполнения, то успех становится не случайностью, а следствием.
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      claude code x openclaw x neon mania protocol, 2026
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    const chars = '01$₽CLAWCODEБОГАТСТВОУСПЕХOPENCLAWCLAUDE';
+    let cols = 0, drops = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      cols = Math.floor(window.innerWidth / 16);
+      drops = Array(cols).fill(0).map(() => Math.random() * -80);
+    }
+
+    function draw() {
+      ctx.fillStyle = 'rgba(2,4,2,0.08)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = '14px JetBrains Mono';
+      for (let i = 0; i < cols; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * 16;
+        const y = drops[i] * 16;
+        ctx.fillStyle = i % 7 === 0 ? '#d4ff00' : '#00ff66';
+        ctx.fillText(char, x, y);
+        if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+      requestAnimationFrame(draw);
+    }
+
+    resize();
+    draw();
+    window.addEventListener('resize', resize);
+  </script>
+</body>
+</html>
