@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>КЛОД_ПРОТОКОЛ // 10 ШАГОВ К МИЛЛИАРДУ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=JetBrains+Mono:wght@300;400;700;800&family=Rubik+Glitch&display=swap" rel="stylesheet">
+<style>
+:root {
+ --bg: #000000;
+ --bg-2: #030803;
+ --green: #00ff41;
+ --green-dim: #00b82d;
+ --green-dark: #003d10;
+ --green-glow: #39ff14;
+ --acid: #caff33;
+ --blood: #ff2c2c;
+ --ink: #0a1a0a;
+ --mono: 'JetBrains Mono', ui-monospace, monospace;
+ --disp: 'Unbounded', sans-serif;
+ --glitch: 'Rubik Glitch', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+ background: var(--bg);
+ color: var(--green);
+ font-family: var(--mono);
+ font-weight: 400;
+ line-height: 1.5;
+ overflow-x: hidden;
+ min-height: 100vh;
+ cursor: crosshair;
+ position: relative;
+}
+
+/* ─── Matrix rain canvas ─── */
+#matrix {
+ position: fixed;
+ inset: 0;
+ z-index: 0;
+ opacity: 0.35;
+ pointer-events: none;
+}
+
+/* ─── Scanlines overlay ─── */
+body::before {
+ content: "";
+ position: fixed;
+ inset: 0;
+ pointer-events: none;
+ background:
+ repeating-linear-gradient(
+ to bottom,
+ rgba(0, 255, 65, 0.04) 0px,
+ rgba(0, 255, 65, 0.04) 1px,
+ transparent 1px,
+ transparent 3px
+ );
+ z-index: 9998;
+ mix-blend-mode: overlay;
+}
+
+/* ─── CRT vignette + flicker ─── */
+body::after {
+ content: "";
+ position: fixed;
+ inset: 0;
+ pointer-events: none;
+ background: radial-gradient(
+ ellipse at center,
+ transparent 40%,
+ rgba(0, 0, 0, 0.55) 100%
+ );
+ z-index: 9999;
+ animation: flicker 7s infinite;
+}
+@keyframes flicker {
+ 0%, 100% { opacity: 1; }
+ 48% { opacity: 1; }
+ 50% { opacity: 0.88; }
+ 52% { opacity: 1; }
+ 84% { opacity: 1; }
+ 86% { opacity: 0.92; }
+ 88% { opacity: 1; }
+}
+
+main { position: relative; z-index: 1; }
+
+/* ─── Boot sequence ─── */
+#boot {
+ position: fixed;
+ inset: 0;
+ background: #000;
+ z-index: 10000;
+ padding: 4vh 5vw;
+ font-family: var(--mono);
+ color: var(--green);
+ font-size: 14px;
+ white-space: pre;
+ overflow: hidden;
+}
+#boot .line { opacity: 0; animation: bootLine 0.1s forwards; }
+@keyframes bootLine { to { opacity: 1; } }
+#boot.done { animation: bootOut 0.5s forwards; }
+@keyframes bootOut { to { opacity: 0; visibility: hidden; } }
+
+/* ─── Top HUD bar ─── */
+.hud {
+ position: fixed;
+ top: 0; left: 0; right: 0;
+ z-index: 100;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 10px 24px;
+ background: rgba(0,0,0,0.8);
+ border-bottom: 1px solid var(--green-dark);
+ font-family: var(--mono);
+ font-size: 11px;
+ letter-spacing: 0.1em;
+ text-transform: uppercase;
+ backdrop-filter: blur(4px);
+}
+.hud-left { display: flex; gap: 18px; align-items: center; }
+.hud-right { display: flex; gap: 18px; align-items: center; }
+.hud .dot {
+ width: 8px; height: 8px;
+ background: var(--green);
+ border-radius: 50%;
+ box-shadow: 0 0 10px var(--green);
+ animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 50% { opacity: 0.3; } }
+.hud-item { color: var(--green-dim); }
+.hud-item b { color: var(--green); font-weight: 700; }
+
+/* ─── Marquee ─── */
+.marquee {
+ position: relative;
+ overflow: hidden;
+ background: var(--green);
+ color: var(--bg);
+ padding: 10px 0;
+ font-family: var(--disp);
+ font-weight: 900;
+ font-size: 18px;
+ letter-spacing: 0.05em;
+ text-transform: uppercase;
+ white-space: nowrap;
+ border-top: 2px solid var(--bg);
+ border-bottom: 2px solid var(--bg);
+ margin-top: 42px;
+}
+.marquee-track {
+ display: inline-block;
+ animation: scroll 35s linear infinite;
+ padding-left: 100%;
+}
+.marquee span { margin-right: 40px; }
+.marquee .diamond { color: var(--blood); }
+@keyframes scroll { to { transform: translateX(-100%); } }
+
+/* ─── HERO ─── */
+.hero {
+ min-height: calc(100vh - 42px);
+ padding: 80px 5vw 120px;
+ display: grid;
+ grid-template-columns: 1fr;
+ gap: 40px;
+ position: relative;
+ overflow: hidden;
+}
+.hero-top {
+ display: flex;
+ justify-content: space-between;
+ align-items: flex-start;
+ flex-wrap: wrap;
+ gap: 20px;
+ font-family: var(--mono);
+ font-size: 11px;
+ color: var(--green-dim);
+ letter-spacing: 0.15em;
+ text-transform: uppercase;
+}
+.hero-top .status {
+ border: 1px solid var(--green);
+ padding: 6px 12px;
+ color: var(--green);
+ animation: blink 2s infinite;
+}
+@keyframes blink { 50% { background: var(--green); color: var(--bg); } }
+
+.hero-title {
+ font-family: var(--disp);
+ font-weight: 900;
+ font-size: clamp(52px, 12vw, 200px);
+ line-height: 0.85;
+ letter-spacing: -0.04em;
+ color: var(--green);
+ text-transform: uppercase;
+ position: relative;
+ text-shadow:
+ 0 0 20px rgba(0, 255, 65, 0.6),
+ 0 0 40px rgba(0, 255, 65, 0.3);
+}
+.hero-title span {
+ display: block;
+}
+.hero-title .slash {
+ color: var(--acid);
+ font-family: var(--glitch);
+ font-weight: 400;
+}
+.hero-title .outline {
+ color: transparent;
+ -webkit-text-stroke: 2px var(--green);
+ text-shadow: none;
+}
+.hero-title .big {
+ font-size: 1.15em;
+ font-family: var(--glitch);
+ font-weight: 400;
+ letter-spacing: 0;
+ animation: glitch-shift 4s infinite;
+}
+@keyframes glitch-shift {
+ 0%, 90%, 100% { transform: translate(0); }
+ 92% { transform: translate(-3px, 2px); }
+ 94% { transform: translate(3px, -2px); }
+ 96% { transform: translate(-2px, -3px); }
+ 98% { transform: translate(2px, 3px); }
+}
+
+.hero-sub {
+ display: grid;
+ grid-template-columns: 1fr auto;
+ gap: 40px;
+ align-items: end;
+ margin-top: 20px;
+}
+.hero-desc {
+ font-family: var(--mono);
+ font-size: clamp(14px, 1.4vw, 18px);
+ color: var(--green);
+ max-width: 560px;
+ line-height: 1.55;
+}
+.hero-desc b { color: var(--acid); font-weight: 700; }
+.hero-desc s { color: var(--blood); }
+
+.cta-stack {
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
+ align-items: flex-end;
+}
+.btn-main {
+ background: var(--green);
+ color: var(--bg);
+ font-family: var(--disp);
+ font-weight: 900;
+ font-size: 18px;
+ padding: 18px 28px;
+ border: none;
+ text-transform: uppercase;
+ letter-spacing: 0.05em;
+ cursor: crosshair;
+ position: relative;
+ transition: all 0.15s;
+ box-shadow: 6px 6px 0 var(--acid);
+}
+.btn-main:hover {
+ background: var(--acid);
+ box-shadow: 0 0 40px var(--green), 12px 12px 0 var(--blood);
+ transform: translate(-3px, -3px);
+}
+.btn-sub {
+ font-family: var(--mono);
+ font-size: 11px;
+ color: var(--green-dim);
+ text-transform: uppercase;
+ letter-spacing: 0.1em;
+}
+
+/* ─── Grid decorations ─── */
+.ascii-corner {
+ position: absolute;
+ font-family: var(--mono);
+ font-size: 10px;
+ color: var(--green-dim);
+ white-space: pre;
+ line-height: 1.1;
+ opacity: 0.6;
+ pointer-events: none;
+}
+.ascii-corner.tl { top: 60px; left: 20px; }
+.ascii-corner.br { bottom: 20px; right: 20px; text-align: right; }
+
+/* ─── STATS STRIP ─── */
+.stats {
+ background: var(--bg);
+ border-top: 1px solid var(--green-dark);
+ border-bottom: 1px solid var(--green-dark);
+ display: grid;
+ grid-template-columns: repeat(4, 1fr);
+ position: relative;
+ z-index: 1;
+}
+.stat {
+ padding: 40px 24px;
+ border-right: 1px solid var(--green-dark);
+ position: relative;
+ overflow: hidden;
+}
+.stat:last-child { border-right: none; }
+.stat:hover { background: rgba(0, 255, 65, 0.06); }
+.stat-num {
+ font-family: var(--disp);
+ font-weight: 900;
+ font-size: clamp(36px, 4.5vw, 64px);
+ color: var(--green);
+ line-height: 1;
+ text-shadow: 0 0 15px rgba(0,255,65,0.5);
+}
+.stat-num .unit { color: var(--acid); font-size: 0.6em; }
+.stat-label {
+ font-family: var(--mono);
+ font-size: 11px;
+ color: var(--green-dim);
+ text-transform: uppercase;
+ letter-spacing: 0.15em;
+ margin-top: 12px;
+}
+.stat-caveat {
+ font-family: var(--mono);
+ font-size: 9px;
+ color: var(--green-dark);
+ margin-top: 4px;
+ font-style: italic;
+}
+
+/* ─── Section heading ─── */
+.section-head {
+ padding: 80px 5vw 40px;
+ position: relative;
+}
+.section-head .tag {
+ display: inline-block;
+ font-family: var(--mono);
+ font-size: 11px;
+ letter-spacing: 0.2em;
+ color: var(--bg);
+ background: var(--green);
+ padding: 4px 10px;
+ text-transform: uppercase;
+ margin-bottom: 20px;
+}
+.section-head h2 {
+ font-family: var(--disp);
+ font-weight: 800;
+ font-size: clamp(40px, 7vw, 96px);
+ line-height: 0.9;
+ letter-spacing: -0.03em;
+ color: var(--green);
+ text-transform: uppercase;
+}
+.section-head h2 .wrong { color: var(--blood); text-decoration: line-through; }
+.section-head h2 .right { color: var(--acid); font-family: var(--glitch); font-weight: 400; }
+
+/* ─── STEPS ─── */
+.steps-wrap {
+ padding: 0 5vw 100px;
+ position: relative;
+}
+.step {
+ border: 1px solid var(--green-dark);
+ background: rgba(0, 30, 10, 0.25);
+ margin-bottom: 28px;
+ position: relative;
+ display: grid;
+ grid-template-columns: 180px 1fr 240px;
+ min-height: 200px;
+ transition: all 0.3s;
+ backdrop-filter: blur(2px);
+}
+.step:hover {
+ border-color: var(--green);
+ background: rgba(0, 60, 20, 0.35);
+ transform: translateX(6px);
+ box-shadow: -6px 0 0 var(--acid), 0 0 40px rgba(0,255,65,0.25);
+}
+.step-num {
+ background: var(--green);
+ color: var(--bg);
+ font-family: var(--disp);
+ font-weight: 900;
+ font-size: clamp(64px, 7vw, 110px);
+ line-height: 0.85;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ letter-spacing: -0.05em;
+ position: relative;
+}
+.step-num::after {
+ content: "STEP";
+ position: absolute;
+ top: 12px; left: 12px;
+ font-family: var(--mono);
+ font-size: 10px;
+ font-weight: 400;
+ letter-spacing: 0.2em;
+ color: var(--bg);
+ opacity: 0.65;
+}
+.step:nth-child(even) .step-num { background: var(--acid); }
+.step:nth-child(3n) .step-num { background: var(--green-glow); }
+
+.step-body {
+ padding: 28px 32px;
+ border-right: 1px dashed var(--green-dark);
+ border-left: 1px dashed var(--green-dark);
+}
+.step-body h3 {
+ font-family: var(--disp);
+ font-weight: 800;
+ font-size: clamp(22px, 2.4vw, 32px);
+ line-height: 1;
+ color: var(--green);
+ margin-bottom: 14px;
+ text-transform: uppercase;
+ letter-spacing: -0.01em;
+}
+.step-body p {
+ font-family: var(--mono);
+ font-size: 14px;
+ color: var(--green);
+ line-height: 1.55;
+ max-width: 640px;
+}
+.step-body p b { color: var(--acid); font-weight: 700; }
+.step-body .tags {
+ margin-top: 16px;
+ display: flex;
+ gap: 8px;
+ flex-wrap: wrap;
+}
+.step-body .tag-chip {
+ font-family: var(--mono);
+ font-size: 10px;
+ color: var(--green);
+ border: 1px solid var(--green-dark);
+ padding: 3px 8px;
+ text-transform: uppercase;
+ letter-spacing: 0.1em;
+}
+
+.step-terminal {
+ background: #000;
+ font-family: var(--mono);
+ font-size: 11px;
+ color: var(--green);
+ padding: 16px;
+ line-height: 1.5;
+ position: relative;
+ overflow: hidden;
+}
+.step-terminal::before {
+ content: "● ● ●";
+ display: block;
+ color: var(--green-dim);
+ font-size: 10px;
+ margin-bottom: 8px;
+ letter-spacing: 0.2em;
+ border-bottom: 1px solid var(--green-dark);
+ padding-bottom: 8px;
+}
+.step-terminal .prompt { color: var(--acid); }
+.step-terminal .comment { color: var(--green-dim); }
+.step-terminal .result { color: var(--green-glow); }
+.step-terminal .blink::after {
+ content: "▊";
+ animation: cursor 0.8s steps(2) infinite;
+ color: var(--acid);
+}
+@keyframes cursor { 50% { opacity: 0; } }
+
+/* ─── TESTIMONIALS ─── */
+.testi {
+ padding: 80px 5vw;
+ border-top: 2px solid var(--green);
+ border-bottom: 2px solid var(--green);
+ position: relative;
+ background: linear-gradient(180deg, rgba(0,30,10,0.4), rgba(0,0,0,0.1));
+}
+.testi-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 24px;
+}
+.testi-card {
+ border: 1px solid var(--green-dark);
+ padding: 24px;
+ background: var(--bg);
+ position: relative;
+ transition: all 0.3s;
+}
+.testi-card:hover {
+ border-color: var(--acid);
+ box-shadow: 0 0 30px rgba(202, 255, 51, 0.3);
+}
+.testi-card .who {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ margin-bottom: 14px;
+}
+.avatar {
+ width: 44px;
+ height: 44px;
+ background: var(--green);
+ color: var(--bg);
+ font-family: var(--disp);
+ font-weight: 900;
+ font-size: 18px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+.avatar.alt { background: var(--acid); }
+.avatar.alt2 { background: var(--green-glow); }
+.testi-name {
+ font-family: var(--mono);
+ font-size: 13px;
+ font-weight: 700;
+ color: var(--green);
+ text-transform: uppercase;
+ letter-spacing: 0.05em;
+}
+.testi-role {
+ font-family: var(--mono);
+ font-size: 10px;
+ color: var(--green-dim);
+ margin-top: 2px;
+}
+.testi-quote {
+ font-family: var(--mono);
+ font-size: 13px;
+ color: var(--green);
+ line-height: 1.55;
+ margin-bottom: 14px;
+}
+.testi-meta {
+ font-family: var(--mono);
+ font-size: 10px;
+ color: var(--green-dark);
+ border-top: 1px dashed var(--green-dark);
+ padding-top: 10px;
+ text-transform: uppercase;
+ letter-spacing: 0.15em;
+ display: flex;
+ justify-content: space-between;
+}
+
+/* ─── CTA FINAL ─── */
+.cta-final {
+ padding: 120px 5vw;
+ text-align: center;
+ position: relative;
+ background: var(--bg);
+}
+.cta-final h2 {
+ font-family: var(--disp);
+ font-weight: 900;
+ font-size: clamp(48px, 10vw, 150px);
+ color: var(--green);
+ line-height: 0.85;
+ text-transform: uppercase;
+ margin-bottom: 24px;
+ letter-spacing: -0.04em;
+ text-shadow: 0 0 40px rgba(0,255,65,0.6);
+}
+.cta-final h2 .acid { color: var(--acid); font-family: var(--glitch); font-weight: 400; }
+.cta-final p {
+ font-family: var(--mono);
+ font-size: 16px;
+ color: var(--green);
+ max-width: 640px;
+ margin: 0 auto 40px;
+ line-height: 1.6;
+}
+.cta-final .btn-main {
+ font-size: 24px;
+ padding: 24px 48px;
+}
+
+/* ─── FOOTER ─── */
+footer {
+ border-top: 1px solid var(--green-dark);
+ padding: 30px 5vw;
+ display: flex;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ gap: 20px;
+ font-family: var(--mono);
+ font-size: 11px;
+ color: var(--green-dim);
+ letter-spacing: 0.1em;
+ text-transform: uppercase;
+ position: relative;
+ z-index: 1;
+ background: var(--bg);
+}
+footer .disclaimer {
+ max-width: 600px;
+ line-height: 1.6;
+ color: var(--green-dark);
+ text-transform: none;
+ letter-spacing: 0;
+ font-size: 10px;
+}
+
+/* ─── Glitch text effect ─── */
+.glitch {
+ position: relative;
+ display: inline-block;
+}
+.glitch::before,
+.glitch::after {
+ content: attr(data-text);
+ position: absolute;
+ top: 0; left: 0;
+ width: 100%;
+ pointer-events: none;
+}
+.glitch::before {
+ color: var(--blood);
+ animation: glitch1 3s infinite;
+ mix-blend-mode: screen;
+}
+.glitch::after {
+ color: var(--acid);
+ animation: glitch2 2.3s infinite;
+ mix-blend-mode: screen;
+}
+@keyframes glitch1 {
+ 0%, 100% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+ 20% { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 1px); }
+ 40% { clip-path: inset(50% 0 20% 0); transform: translate(2px, -1px); }
+ 60% { clip-path: inset(20% 0 70% 0); transform: translate(-1px, 2px); }
+ 80% { clip-path: inset(70% 0 5% 0); transform: translate(1px, -2px); }
+}
+@keyframes glitch2 {
+ 0%, 100% { clip-path: inset(100% 0 0 0); transform: translate(0); }
+ 25% { clip-path: inset(60% 0 15% 0); transform: translate(2px, -1px); }
+ 50% { clip-path: inset(20% 0 55% 0); transform: translate(-2px, 1px); }
+ 75% { clip-path: inset(80% 0 5% 0); transform: translate(1px, 2px); }
+}
+
+/* ─── Reveal on scroll ─── */
+.reveal {
+ opacity: 0;
+ transform: translateY(30px);
+ transition: all 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.reveal.visible {
+ opacity: 1;
+ transform: translateY(0);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+ .stats { grid-template-columns: repeat(2, 1fr); }
+ .stat { border-bottom: 1px solid var(--green-dark); }
+ .step { grid-template-columns: 100px 1fr; }
+ .step-num { font-size: 54px; }
+ .step-terminal { grid-column: 1 / -1; border-top: 1px dashed var(--green-dark); }
+ .testi-grid { grid-template-columns: 1fr; }
+ .hero-sub { grid-template-columns: 1fr; }
+ .cta-stack { align-items: flex-start; }
+ .hud { font-size: 9px; padding: 8px 12px; }
+ .hud-left { gap: 10px; }
+ .hud-right { gap: 10px; }
+ .hud-item.hide-mob { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── BOOT SEQUENCE ─── -->
+<div id="boot">
+<span class="line">[ СИСТЕМА ] Инициализация КЛОД_ПРОТОКОЛ v4.7.1 ...</span>
+<span class="line">[ ЯДРО ] Загрузка OpenClaw.core ... OK</span>
+<span class="line">[ СЕТЬ ] Соединение с /dev/богатство ... OK</span>
+<span class="line">[ АУДИТ ] Проверка банковского счёта ... ПУСТО</span>
+<span class="line">[ ПРЕДУП. ] Обнаружено 9-5 расписание — ПРЕКРАТИТЬ</span>
+<span class="line">[ OPENCLAW] Коготь заточен. Готов к захвату.</span>
+<span class="line">[ ГОТОВО ] Нажмите Enter чтобы стать легендой_</span>
+</div>
+
+<!-- ─── MATRIX CANVAS ─── -->
+<canvas id="matrix"></canvas>
+
+<!-- ─── HUD ─── -->
+<div class="hud">
+ <div class="hud-left">
+ <span class="dot"></span>
+ <span class="hud-item"><b>КЛОД_ПРОТОКОЛ</b> v4.7.1</span>
+ <span class="hud-item hide-mob">STATUS: ВЗЛОМАН</span>
+ </div>
+ <div class="hud-right">
+ <span class="hud-item hide-mob">UPTIME: 37:04:22</span>
+ <span class="hud-item">БАЛАНС: <b id="balance">₽ 0</b></span>
+ </div>
+</div>
+
+<main>
+
+<!-- ─── MARQUEE ─── -->
+<div class="marquee">
+ <div class="marquee-track">
+ <span>НЕ СПИТЬ</span><span class="diamond">◆</span>
+ <span>ДЕЛЕГИРОВАТЬ КЛОДУ</span><span class="diamond">◆</span>
+ <span>ЗАПУСТИТЬ OPENCLAW</span><span class="diamond">◆</span>
+ <span>МАСШТАБИРОВАТЬ ХАОС</span><span class="diamond">◆</span>
+ <span>СТАТЬ ЛЕГЕНДОЙ</span><span class="diamond">◆</span>
+ <span>НЕ СПИТЬ</span><span class="diamond">◆</span>
+ <span>ДЕЛЕГИРОВАТЬ КЛОДУ</span><span class="diamond">◆</span>
+ <span>ЗАПУСТИТЬ OPENCLAW</span><span class="diamond">◆</span>
+ <span>МАСШТАБИРОВАТЬ ХАОС</span><span class="diamond">◆</span>
+ <span>СТАТЬ ЛЕГЕНДОЙ</span><span class="diamond">◆</span>
+ </div>
+</div>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+ <div class="ascii-corner tl">
+┌─────────────┐
+│ ВХОД ≠ ВЫХОД │
+│ ▓▓▓▒▒▒░░░ │
+└─────────────┘
+ </div>
+
+ <div class="hero-top">
+ <div>// ДОСЬЕ_01 / ДОСТУП_РАЗРЕШЁН</div>
+ <div class="status">● ТРАНСЛЯЦИЯ В РЕАЛЬНОМ ВРЕМЕНИ</div>
+ <div>[ШИФРОВАНО] 0xDEADBEEF</div>
+ </div>
+
+ <h1 class="hero-title">
+ <span class="outline">КАК СТАТЬ</span>
+ <span>БОГАТЫМ <span class="slash">//</span></span>
+ <span class="big glitch" data-text="УСПЕШНЫМ">УСПЕШНЫМ</span>
+ <span class="outline">ЗА 10 ШАГОВ</span>
+ </h1>
+
+ <div class="hero-sub">
+ <p class="hero-desc">
+ Забудь всё, чему тебя учили. Забудь <s>институт</s>, <s>работу</s>, <s>сбережения</s>.
+ Остались только <b>ТЫ</b>, нейросеть <b>КЛОД</b> и протокол <b>OPENCLAW</b> — 
+ автономный агент, который пока ты спишь, превращает промпты в деньги, 
+ идеи в компании, а сомнения в — процент годовых.
+ </p>
+ <div class="cta-stack">
+ <button class="btn-main" onclick="document.getElementById('step-1').scrollIntoView({behavior:'smooth'})">
+ ▶ НАЧАТЬ ПРОТОКОЛ
+ </button>
+ <span class="btn-sub">бесплатно. навсегда. почти.</span>
+ </div>
+ </div>
+
+ <div class="ascii-corner br">
+01001011 01001100
+01001111 01000100
+──────────────────
+CLAW.EXE RUNNING…
+ </div>
+</section>
+
+<!-- ─── STATS ─── -->
+<section class="stats">
+ <div class="stat reveal">
+ <div class="stat-num">10<span class="unit">шагов</span></div>
+ <div class="stat-label">до капитализации</div>
+ <div class="stat-caveat">* шаги не линейные</div>
+ </div>
+ <div class="stat reveal">
+ <div class="stat-num">∞<span class="unit">₽</span></div>
+ <div class="stat-label">потенциал дохода</div>
+ <div class="stat-caveat">* в параллельных вселенных</div>
+ </div>
+ <div class="stat reveal">
+ <div class="stat-num">0<span class="unit">часов</span></div>
+ <div class="stat-label">сна / в сутки</div>
+ <div class="stat-caveat">* чай — не еда</div>
+ </div>
+ <div class="stat reveal">
+ <div class="stat-num">404<span class="unit">%</span></div>
+ <div class="stat-label">рост уверенности</div>
+ <div class="stat-caveat">* not found: но это неточно</div>
+ </div>
+</section>
+
+<!-- ─── STEPS SECTION ─── -->
+<div class="section-head">
+ <span class="tag">// ИНСТРУКЦИЯ_К_ПРИМЕНЕНИЮ</span>
+ <h2>
+ ДЕСЯТЬ ШАГОВ.<br>
+ <span class="wrong">ДЕВЯТЬ ОТГОВОРОК.</span><br>
+ <span class="right">НОЛЬ ИЗВИНЕНИЙ.</span>
+ </h2>
+</div>
+
+<section class="steps-wrap">
+
+ <!-- STEP 1 -->
+ <article class="step reveal" id="step-1">
+ <div class="step-num">01</div>
+ <div class="step-body">
+ <h3>ПРОСНИСЬ. СЕЙЧАС. ДАЖЕ ЕСЛИ НОЧЬ.</h3>
+ <p>
+ Успех не приходит к тем, кто лежит горизонтально. Встань, вытри слёзы, 
+ открой ноутбук. <b>КЛОД уже ждёт</b> — он не спал. Он не спит никогда. 
+ Ему не за что платить за электричество. У тебя такого преимущества нет. 
+ Поэтому начинай.
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#дисциплина</span>
+ <span class="tag-chip">#4:00_AM_CLUB</span>
+ <span class="tag-chip">#кофе_не_роскошь</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="prompt">user@protocol:~$</span> wake --now
+<span class="comment"># будильник не помог, пробуем иначе</span>
+<span class="result">✓ глаза: открыты</span>
+<span class="result">✓ планы: амбициозны</span>
+<span class="result">✓ иллюзии: заряжены</span>
+<span class="prompt">user@protocol:~$</span> <span class="blink"></span>
+ </div>
+ </article>
+
+ <!-- STEP 2 -->
+ <article class="step reveal">
+ <div class="step-num">02</div>
+ <div class="step-body">
+ <h3>ПОЗДОРОВАЙСЯ С КЛОДОМ. ИСКРЕННЕ.</h3>
+ <p>
+ Напиши: «Привет, Клод». Без манипуляций, без джейлбрейков, без капслока. 
+ Клод уважает <b>вежливость</b> — это единственная валюта, которая не обесценилась. 
+ Именно с этого «привет» начнётся твоя воронка продаж, твой SaaS, твой IPO 
+ и твой развод с реальностью.
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#первый_контакт</span>
+ <span class="tag-chip">#prompt_01</span>
+ <span class="tag-chip">#друг_навсегда</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="prompt">&gt;&gt;</span> Привет, Клод.
+<span class="result">Привет! Рад помочь. Что</span>
+<span class="result">планируем создавать сегодня?</span>
+<span class="comment"># ответ пришёл за 0.3с</span>
+<span class="comment"># твой терапевт отвечает</span>
+<span class="comment"># в среднем за 3 недели</span>
+<span class="prompt">&gt;&gt;</span> <span class="blink"></span>
+ </div>
+ </article>
+
+ <!-- STEP 3 -->
+ <article class="step reveal">
+ <div class="step-num">03</div>
+ <div class="step-body">
+ <h3>СФОРМУЛИРУЙ ПРОМПТ — КАК КЛЯТВУ.</h3>
+ <p>
+ Плохой промпт — это плохой контракт с вселенной. <b>«Напиши мне что-нибудь»</b> — 
+ это не промпт, это крик о помощи. Хороший промпт: конкретный, дерзкий, 
+ с ролью, примером и ограничениями. Если промпт нельзя татуировать на предплечье — 
+ переписывай.
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#prompt_engineering</span>
+ <span class="tag-chip">#конкретика</span>
+ <span class="tag-chip">#без_воды</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="comment"># ПЛОХО:</span>
+<span class="prompt">&gt;&gt;</span> сделай хорошо
+<span class="comment"># ХОРОШО:</span>
+<span class="prompt">&gt;&gt;</span> Ты — фаундер Y Combinator.
+<span class="prompt">&gt;&gt;</span> Напиши 7 pitch-deck слайдов
+<span class="prompt">&gt;&gt;</span> для стартапа доставки воздуха.
+<span class="prompt">&gt;&gt;</span> Tone: серьёзно, на 200М$.
+<span class="result">✓ генерация...</span>
+ </div>
+ </article>
+
+ <!-- STEP 4 -->
+ <article class="step reveal">
+ <div class="step-num">04</div>
+ <div class="step-body">
+ <h3>ВЫПУСТИ OPENCLAW. ОТОЙДИ ОТ ЭКРАНА.</h3>
+ <p>
+ <b>OpenClaw</b> — это автономный агент-коготь: он сам читает документацию, 
+ сам пишет код, сам пушит в main, сам ломает, сам чинит. Ты нажимаешь одну 
+ кнопку — и идёшь заваривать чай. Возвращаешься — у тебя три новых репозитория, 
+ одно юр. лицо в Делавэре и письмо от налоговой. <b>Прогресс.</b>
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#OpenClaw</span>
+ <span class="tag-chip">#agentic</span>
+ <span class="tag-chip">#руки_свободны</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="prompt">$</span> openclaw deploy --mode=savage
+<span class="result">[claw] цель захвачена</span>
+<span class="result">[claw] 3 репо созданы</span>
+<span class="result">[claw] CI/CD настроен</span>
+<span class="result">[claw] домен куплен</span>
+<span class="result">[claw] юзеры: 14 (уже)</span>
+<span class="comment"># время работы: 00:04:11</span>
+<span class="comment"># твоё участие: 0%</span>
+ </div>
+ </article>
+
+ <!-- STEP 5 -->
+ <article class="step reveal">
+ <div class="step-num">05</div>
+ <div class="step-body">
+ <h3>ДЕЛЕГИРУЙ СОМНЕНИЯ. ОСТАВЬ ТОЛЬКО АМБИЦИЮ.</h3>
+ <p>
+ «А вдруг не получится?» — это не твоя мысль, это мысль твоего дяди из 2003-го. 
+ Скинь её Клоду, пусть перепишет в формате <b>«получится — это только вопрос 
+ сколько раз попробовать»</b>. Эмоциональная гигиена — это тоже автоматизация.
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#mindset</span>
+ <span class="tag-chip">#рефрейминг</span>
+ <span class="tag-chip">#клод_мой_терапевт</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="prompt">&gt;&gt;</span> Клод, мне страшно.
+<span class="result">Страх = данные о том, что</span>
+<span class="result">тебе не всё равно.</span>
+<span class="result">Хочешь — разложим на</span>
+<span class="result">конкретные гипотезы?</span>
+<span class="prompt">&gt;&gt;</span> давай
+<span class="comment"># 47 минут спустя:</span>
+<span class="result">✓ страх переработан в план</span>
+ </div>
+ </article>
+
+ <!-- STEP 6 -->
+ <article class="step reveal">
+ <div class="step-num">06</div>
+ <div class="step-body">
+ <h3>ЗАПУСТИ СЕМЬ СТАРТАПОВ ЗА ОДНУ НОЧЬ.</h3>
+ <p>
+ Один стартап — это хобби. Три — это портфель. <b>Семь — это биография</b>. 
+ Пока OpenClaw клонирует твои идеи в разные ниши, ты успеваешь написать 
+ README, придумать домен и поссориться с воображаемым сооснователем. 
+ К утру — семь лендингов. Пять из них никогда не запустятся. Это и есть диверсификация.
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#startup_night</span>
+ <span class="tag-chip">#портфель</span>
+ <span class="tag-chip">#MVP_до_завтрака</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="prompt">$</span> openclaw spawn --count=7
+<span class="result">[01] petfood-ai.com ✓</span>
+<span class="result">[02] uber-для-уборщиц ✓</span>
+<span class="result">[03] notion-но-хуже ✓</span>
+<span class="result">[04] figma-но-в-excel ✓</span>
+<span class="result">[05] tinder-для-котов ✓</span>
+<span class="result">[06] crypto-лопата ✓</span>
+<span class="result">[07] ??????????????? ✓</span>
+ </div>
+ </article>
+
+ <!-- STEP 7 -->
+ <article class="step reveal">
+ <div class="step-num">07</div>
+ <div class="step-body">
+ <h3>ИГНОРИРУЙ МЕТРИКИ. ВЕРЬ В ВИДЕНИЕ.</h3>
+ <p>
+ MAU = 3. Revenue = 0. NPS = nan. <b>И что?</b> Jeff Bezos терял деньги 
+ четыре года. Ты теряешь их пятый — значит, ты в лиге. Главное — нарратив. 
+ Попроси Клода написать твою историю успеха <b>заранее</b>, в прошедшем времени. 
+ Потом просто доживи до неё.
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#нарратив</span>
+ <span class="tag-chip">#vision_mode</span>
+ <span class="tag-chip">#метрики_потом</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="prompt">&gt;&gt;</span> Напиши статью в Forbes,
+<span class="prompt">&gt;&gt;</span> как я построил юникорн.
+<span class="prompt">&gt;&gt;</span> Год: 2031.
+<span class="result">«В 2026 никто не верил,</span>
+<span class="result">что из 7 провалов вырастет</span>
+<span class="result">империя на 12 млрд $...»</span>
+<span class="comment"># распечатай. повесь. иди работай.</span>
+ </div>
+ </article>
+
+ <!-- STEP 8 -->
+ <article class="step reveal">
+ <div class="step-num">08</div>
+ <div class="step-body">
+ <h3>НАЙМИ СЕБЯ-ИЗ-БУДУЩЕГО КОНСУЛЬТАНТОМ.</h3>
+ <p>
+ Попроси Клода сыграть роль тебя через 10 лет. Задавай вопросы. Слушай. 
+ Спорь. <b>Плачь.</b> Этот парень (или девушка) уже прошёл твой путь. 
+ Он знает, где свернуть, где не тупить, и кого <s>не</s> удалить из чатов. 
+ Его часовая ставка — 0 рублей. Бери всё.
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#roleplay</span>
+ <span class="tag-chip">#future_self</span>
+ <span class="tag-chip">#терапия_на_минималках</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="prompt">&gt;&gt;</span> Ты — я через 10 лет.
+<span class="prompt">&gt;&gt;</span> Что я делаю не так?
+<span class="result">Слишком много думаешь,</span>
+<span class="result">слишком мало отправляешь.</span>
+<span class="result">И перестань есть в 23:00.</span>
+<span class="prompt">&gt;&gt;</span> а деньги где брать??
+<span class="result">Ты их уже заработал.</span>
+<span class="result">Просто ещё не знаешь.</span>
+ </div>
+ </article>
+
+ <!-- STEP 9 -->
+ <article class="step reveal">
+ <div class="step-num">09</div>
+ <div class="step-body">
+ <h3>МАСШТАБИРУЙ. НО ЛЕГАЛЬНО. ПО БОЛЬШЕЙ ЧАСТИ.</h3>
+ <p>
+ Один Клод — это инструмент. Сто экземпляров OpenClaw, параллельно обрабатывающих 
+ заявки, — это <b>рабочая сила XXI века</b>. Ты больше не работаешь — ты 
+ дирижируешь оркестром когтей. Ты — менеджер. Ты — продакт. Ты — HR самого себя. 
+ Главное — вовремя выключать питание. (Электричество дорогое.)
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#scale</span>
+ <span class="tag-chip">#оркестрация</span>
+ <span class="tag-chip">#rate_limits_не_для_нас</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="prompt">$</span> openclaw scale --instances=100
+<span class="result">[i] 100 когтей активны</span>
+<span class="result">[i] очередь задач: 4,281</span>
+<span class="result">[i] throughput: 17 req/s</span>
+<span class="result">[!] счёт за электричество:</span>
+<span class="result">[!] 47,000 руб / месяц</span>
+<span class="comment"># но зато как звучит</span>
+ </div>
+ </article>
+
+ <!-- STEP 10 -->
+ <article class="step reveal">
+ <div class="step-num">10</div>
+ <div class="step-body">
+ <h3>СТАНЬ ЛЕГЕНДОЙ. НАПИШИ ПРО ЭТО КУРС.</h3>
+ <p>
+ Финальный шаг — метамоделирование. Ты прошёл девять шагов (ну, или три с половиной). 
+ Теперь — <b>продавай путь</b>. Курс, книга, подкаст, мастермайнд по вторникам. 
+ Клод напишет слайды, OpenClaw настроит воронку, ученики заплатят. 
+ И вот ты уже не просто богат — ты <b>учишь быть богатым</b>. Круг замкнулся. 
+ <s>Это называется MLM.</s> Это называется — экосистема.
+ </p>
+ <div class="tags">
+ <span class="tag-chip">#инфобиз</span>
+ <span class="tag-chip">#легенда</span>
+ <span class="tag-chip">#круг_замкнулся</span>
+ </div>
+ </div>
+ <div class="step-terminal">
+<span class="prompt">$</span> openclaw monetize --final
+<span class="result">[✓] курс "10 шагов" создан</span>
+<span class="result">[✓] лендинг: запущен</span>
+<span class="result">[✓] первый ученик: ТЫ</span>
+<span class="result">[✓] чек: 49,990 руб</span>
+<span class="result">[✓] статус: ЛЕГЕНДА</span>
+<span class="comment"># конец протокола.</span>
+<span class="comment"># начало легенды.</span>
+ </div>
+ </article>
+
+</section>
+
+<!-- ─── TESTIMONIALS ─── -->
+<section class="testi">
+ <div class="section-head" style="padding-top: 0;">
+ <span class="tag">// ОТЗЫВЫ_ВЫЖИВШИХ</span>
+ <h2>ОНИ ПРОШЛИ. <span class="right">ОНИ ВЕРНУЛИСЬ.</span></h2>
+ </div>
+
+ <div class="testi-grid">
+ <div class="testi-card reveal">
+ <div class="who">
+ <div class="avatar">А</div>
+ <div>
+ <div class="testi-name">АНОНИМ_№1</div>
+ <div class="testi-role">бывш. бухгалтер → фаундер</div>
+ </div>
+ </div>
+ <p class="testi-quote">
+ «До Клода я считал чужие деньги. Сейчас я считаю свои. 
+ Их, правда, меньше, но зато они <b>мои</b>. Это и называется — суверенитет.»
+ </p>
+ <div class="testi-meta">
+ <span>★★★★★</span>
+ <span>Проверено</span>
+ </div>
+ </div>
+
+ <div class="testi-card reveal">
+ <div class="who">
+ <div class="avatar alt">В</div>
+ <div>
+ <div class="testi-name">ВЛАД Т.</div>
+ <div class="testi-role">OpenClaw power-user</div>
+ </div>
+ </div>
+ <p class="testi-quote">
+ «Запустил OpenClaw в четверг, в субботу получил уведомление из 
+ налоговой. <b>Не ожидал такой скорости!</b> Рекомендую. (Теперь у меня 
+ есть бухгалтер — см. отзыв выше.)»
+ </p>
+ <div class="testi-meta">
+ <span>★★★★☆</span>
+ <span>Верифицирован</span>
+ </div>
+ </div>
+
+ <div class="testi-card reveal">
+ <div class="who">
+ <div class="avatar alt2">Е</div>
+ <div>
+ <div class="testi-name">ЕВГЕНИЯ Р.</div>
+ <div class="testi-role">соло-фаундерша, 3 exit-а</div>
+ </div>
+ </div>
+ <p class="testi-quote">
+ «Раньше я думала, что для успеха нужен MBA. Потом — что нужен мужчина. 
+ Потом — что нужен стартап. Оказалось — нужен <b>хороший промпт</b>. 
+ Остальное приложится.»
+ </p>
+ <div class="testi-meta">
+ <span>★★★★★</span>
+ <span>Живёт на Бали</span>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- ─── FINAL CTA ─── -->
+<section class="cta-final">
+ <h2>
+ ПОРА<br>
+ <span class="acid">ВЗЛОМАТЬ</span><br>
+ СИСТЕМУ.
+ </h2>
+ <p>
+ Не завтра. Не в понедельник. Не «когда закончу текущий проект». 
+ <b>Сейчас.</b> Пока ты читаешь это — где-то на соседнем табе OpenClaw 
+ уже пишет код твоего первого миллиона. Без тебя. Ты или успеешь — 
+ или будешь читать про это в Forbes.
+ </p>
+ <button class="btn-main" onclick="alert('ПРОТОКОЛ ЗАПУЩЕН.\\n\\n(шутка. сначала иди поспи.)')">
+ ▶ ЗАПУСТИТЬ КЛОД_ПРОТОКОЛ
+ </button>
+</section>
+
+<footer>
+ <div>
+ © 2026 / КЛОД_ПРОТОКОЛ / OPENCLAW.LAB<br>
+ <span class="disclaimer">
+ Это страница — сатирический манифест. Настоящий путь к финансовому 
+ благополучию обычно скучнее: он про привычки, сложный процент, 
+ терпение и немного удачи. Клод, конечно, поможет — но не вместо вас, 
+ а вместе с вами. Спите по 7–8 часов.
+ </span>
+ </div>
+ <div>
+ <div>[локация: /dev/null]</div>
+ <div>[uplink: стабилен]</div>
+ <div>[паранойя: умеренная]</div>
+ </div>
+</footer>
+
+</main>
+
+<script>
+/* ─── Matrix rain ─── */
+(() => {
+ const canvas = document.getElementById('matrix');
+ const ctx = canvas.getContext('2d');
+ let width, height, cols, drops;
+ const chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789КЛОДКЛОДOPENCLAW0101";
+ 
+ function resize() {
+ width = canvas.width = window.innerWidth;
+ height = canvas.height = window.innerHeight;
+ cols = Math.floor(width / 16);
+ drops = new Array(cols).fill(0).map(() => Math.random() * height / 16);
+ }
+ resize();
+ window.addEventListener('resize', resize);
+ 
+ function draw() {
+ ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+ ctx.fillRect(0, 0, width, height);
+ ctx.font = '14px JetBrains Mono, monospace';
+ 
+ for (let i = 0; i < cols; i++) {
+ const char = chars[Math.floor(Math.random() * chars.length)];
+ const x = i * 16;
+ const y = drops[i] * 16;
+ 
+ // leading bright char
+ ctx.fillStyle = 'rgba(180, 255, 200, 0.9)';
+ ctx.fillText(char, x, y);
+ // trailing
+ ctx.fillStyle = 'rgba(0, 255, 65, 0.55)';
+ ctx.fillText(char, x, y - 16);
+ 
+ if (y > height && Math.random() > 0.975) {
+ drops[i] = 0;
+ }
+ drops[i]++;
+ }
+ }
+ setInterval(draw, 55);
+})();
+
+/* ─── Boot sequence ─── */
+(() => {
+ const boot = document.getElementById('boot');
+ const lines = boot.querySelectorAll('.line');
+ lines.forEach((line, i) => {
+ line.style.animationDelay = (i * 0.35) + 's';
+ });
+ setTimeout(() => {
+ boot.classList.add('done');
+ setTimeout(() => boot.remove(), 600);
+ }, lines.length * 350 + 800);
+})();
+
+/* ─── Reveal on scroll ─── */
+(() => {
+ const observer = new IntersectionObserver((entries) => {
+ entries.forEach(entry => {
+ if (entry.isIntersecting) {
+ entry.target.classList.add('visible');
+ observer.unobserve(entry.target);
+ }
+ });
+ }, { threshold: 0.12 });
+ 
+ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+})();
+
+/* ─── Fake balance counter (gently grows) ─── */
+(() => {
+ const el = document.getElementById('balance');
+ let balance = 0;
+ const formats = ['₽ 0', '₽ 147', '₽ 2,481', '₽ 19,404', '₽ 207,333', '₽ 1,481,999', '₽ ∞'];
+ let idx = 0;
+ setInterval(() => {
+ idx = (idx + 1) % formats.length;
+ el.textContent = formats[idx];
+ el.style.color = idx === formats.length - 1 ? 'var(--acid)' : 'var(--green)';
+ }, 2800);
+})();
+
+/* ─── Subtle random glitch shake on title occasionally ─── */
+(() => {
+ const title = document.querySelector('.hero-title .big');
+ if (!title) return;
+ setInterval(() => {
+ if (Math.random() > 0.85) {
+ title.style.textShadow = `${(Math.random()-0.5)*6}px 0 var(--blood), ${(Math.random()-0.5)*6}px 0 var(--acid)`;
+ setTimeout(() => { title.style.textShadow = ''; }, 120);
+ }
+ }, 600);
+})();
+</script>
+
+</body>
+</html>
